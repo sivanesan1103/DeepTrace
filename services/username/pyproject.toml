@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "username-service"
+version = "0.1.0"
+description = "Username hunter service with Maigret integration"
+authors = [{name = "Shadow"}]
+dependencies = [
+    "fastapi>=0.104.0",
+    "uvicorn[standard]>=0.27.0",
+    "redis>=5.0.0",
+    "httpx>=0.25.0",
+    "maigret>=0.0.0",
+    "celery>=5.4.0",
+]
+
+[project.optional.dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "black>=24.0.0",
+    "isort>=5.0.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
