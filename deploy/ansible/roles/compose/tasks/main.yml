@@ -1,0 +1,23 @@
+---
+- name: Install docker-compose plugin
+  apt:
+    name: docker-compose-plugin
+    state: present
+    update_cache: yes
+
+- name: Create directory for compose stack
+  file:
+    path: /opt/stack
+    state: directory
+    mode: '0755'
+
+- name: Copy docker-compose.yml
+  copy:
+    src: docker-compose.yml
+    dest: /opt/stack/docker-compose.yml
+    mode: '0644'
+
+- name: Deploy stack with docker-compose
+  community.docker.docker_compose:
+    project_src: /opt/stack
+    state: present

@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  # Example services - replace with actual services
+  web:
+    image: "{{ web_image }}:{{ web_tag }}"
+    ports:
+      - "80:80"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+
+  api:
+    image: "{{ api_image }}:{{ api_tag }}"
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://user:pass@db:5432/db
+    restart: unless-stopped
+
+  db:
+    image: postgres:13
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=pass
+      - POSTGRES_DB=db
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

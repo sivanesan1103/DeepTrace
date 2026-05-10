@@ -1,0 +1,25 @@
+---
+- name: Install logrotate (if not present)
+  apt:
+    name: logrotate
+    state: present
+    update_cache: yes
+
+- name: Create custom logrotate config for application logs
+  copy:
+    dest: /etc/logrotate.d/app
+    content: |
+      /opt/stack/logs/*.log {
+        daily
+        missingok
+        rotate 14
+        compress
+        delaycompress
+        notifempty
+        create 0640 www-data adm
+        sharedscripts
+        postrotate
+            systemctl reload rsyslog >/dev/null 2>&1 || true
+        endscript
+      }
+    mode: '0644'

@@ -1,0 +1,20 @@
+[DEFAULT]
+# Ban hosts for one hour:
+bantime = 3600
+
+# Override /etc/fail2ban/jail.d/00-firewalld.conf:
+banaction = iptables-multiport
+
+[sshd]
+enabled = true
+port    = ssh
+filter  = sshd
+logpath = /var/log/auth.log
+maxretry = 3
+
+[docker]
+enabled = true
+port    = docker
+filter  = docker-auth
+logpath = /var/log/docker.log
+maxretry = 3
