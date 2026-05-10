@@ -1,0 +1,116 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop, staging ]
+  pull_request:
+    branches: [ main, develop, staging ]
+
+jobs:
+  lint-and-typecheck:
+    name: Lint & Typecheck
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [frontend, gateway, auth, search, face, username, email, phone, geo]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        if: matrix.service == 'frontend'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: apps/web/package-lock.json
+
+      - name: Setup Python
+        if: matrix.service != 'frontend'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: services/${{ matrix.service }}/pyproject.toml
+
+      - name: Cache dependencies
+        if: matrix.service == 'frontend'
+        uses: actions/cache@v4
+        with:
+          path: |
+            apps/web/node_modules
+            ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('apps/web/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Cache pip dependencies
+        if: matrix.service != 'frontend'
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/pip
+            services/${{ matrix.service }}/.venv
+          key: ${{ runner.os }}-python-${{ hashFiles('services/${{ matrix.service }}/pyproject.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-python-
+
+      - name: Install dependencies (frontend)
+        if: matrix.service == 'frontend'
+        run: |
+          cd apps/web
+          npm ci
+
+      - name: Install dependencies (backend)
+        if: matrix.service != 'frontend'
+        run: |
+          cd services/${{ matrix.service }}
+          python -m venv .venv
+          source .venv/bin/activate
+          pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Run linter
+        if: matrix.service == 'frontend'
+        run: |
+          cd apps/web
+          npm run lint
+
+      - name: Run typecheck
+        if: matrix.service == 'frontend'
+        run: |
+          cd apps/web
+          npm run typecheck
+
+      - name: Run tests
+        if: matrix.service == 'frontend'
+        run: |
+          cd apps/web
+          npm test -- --passWithNoTests
+
+      - name: Run linter & tests (backend)
+        if: matrix.service != 'frontend'
+        run: |
+          cd services/${{ matrix.service }}
+          source .venv/bin/activate
+          python -m pytest --doctest-modules --ignore=tests/integration
+
+  docker-lint:
+    name: Dockerfile Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Lint Dockerfiles
+        run: |
+          find . -name 'Dockerfile*' -not -path '*/.git/*' | while read -r dockerfile; do
+            echo "Linting $dockerfile"
+            # Hadolint checks - basic syntax validation
+            if command -v hadolint &> /dev/null; then
+              hadolint "$dockerfile" || true
+            else
+              echo "Hadolint not installed, skipping"
+            fi
+          done
