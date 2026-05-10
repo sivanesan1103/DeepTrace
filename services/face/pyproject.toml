@@ -1,0 +1,32 @@
+[tool.poetry]
+name = "face-service"
+version = "0.1.0"
+description = "Face recognition service with FAISS vector search"
+authors = ["DeepTrace Team <team@deeptrace.io>"]
+packages = [{include = "face_service", from = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.115.0"
+uvicorn = {version = "^0.30.0", extras = ["standard"]}
+opencv-python-headless = "^4.10.0"
+insightface = "^0.7.1"
+faiss-cpu = "^1.9.0"
+redis = "^5.2.0"
+numpy = "^2.0.0"
+pillow = "^10.4.0"
+sqlalchemy = {version = "^2.0.0", extras = ["asyncio"]}
+asyncpg = "^0.29.0"
+psycopg2-binary = "^2.9.9"
+pydantic = "^2.10.0"
+pydantic-settings = "^2.5.0"
+python-multipart = "^0.0.9"
+scikit-learn = "^1.5.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.0"
+pytest-asyncio = "^0.24.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
