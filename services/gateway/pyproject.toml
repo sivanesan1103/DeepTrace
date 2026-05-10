@@ -1,0 +1,15 @@
+[project]
+name = "gateway-service"
+version = "0.1.0"
+description = "API Gateway service for DeepTrace"
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "redis",
+    "httpx",
+    "prometheus-client",
+]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
